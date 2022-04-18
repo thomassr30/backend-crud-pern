@@ -4,14 +4,24 @@ const {} = require('../db')
 const getAllTasks = async (req, res) => {
     try {
         const allTaskts = await pool.query('SELECT * FROM task')
-        res.json(allTaskts.rows)
+        return res.json(allTaskts.rows)
     } catch (error) {
         return res.json({error: error.message})
     }
 }
 
 const getTask = async (req, res) => {
-    res.send('Obteniendo 1 tarea')
+    const {id} = req.params
+    try {
+        const task = await pool.query('SELECT * FROM task where id = $1',[id])
+        if(task.rows.length === 0){
+            return res.status(404).json({msg: 'Tarea no encontrada'})
+            
+        }
+        return res.json(task.rows)
+    } catch (error) {
+        next(error)
+    }
 }
 
 const createTask = async (req, res) => {
@@ -23,16 +33,42 @@ const createTask = async (req, res) => {
             )
         res.json(result.rows[0])
     } catch (error) {
-        return res.json({error: error.message})
+        next(error)
     }
 }
 
 const updateTask = async (req, res) => {
-    res.send('actualizando 1 tarea')
+    const {id} = req.params
+    const {title, description} = req.body
+    try {
+        const task = await pool.query(
+            `UPDATE task SET
+            title = $1,
+            description = $2
+            where id = $3 RETURNING *`
+            ,[title, description, id])
+        if(task.rowCount === 0){
+            return res.status(404).json({msg: 'Tarea no encontrada'})    
+        }
+        return res.json(task.rows[0])
+    } catch (error) {
+        next(error)
+    }
 }
 
 const deleteTask = async (req, res) => {
-    res.send('eliminando 1 tarea')
+    const {id} = req.params
+    try {
+        const task = await pool.query(
+            'DELETE FROM task where id = $1'
+            ,[id])
+        if(task.rowCount === 0){
+            return res.status(404).json({msg: 'Tarea no encontrada'})    
+        }
+        return res.sendStatus(204)
+    } catch (error) {
+        next(error)
+    }
 }
 
 
