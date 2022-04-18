@@ -3,3 +3,6 @@
 
 # Ignora la carpeta node_modules
 node_modules
+
+# Ignora claves de entorno
+.env
