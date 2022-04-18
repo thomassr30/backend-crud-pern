@@ -4,14 +4,24 @@ const {} = require('../db')
 const getAllTasks = async (req, res) => {
     try {
         const allTaskts = await pool.query('SELECT * FROM task')
-        res.json(allTaskts.rows)
+        return res.json(allTaskts.rows)
     } catch (error) {
         return res.json({error: error.message})
     }
 }
 
 const getTask = async (req, res) => {
-    res.send('Obteniendo 1 tarea')
+    const {id} = req.params
+    try {
+        const task = await pool.query('SELECT * FROM task where id = $1',[id])
+        if(task.rows.length === 0){
+            return res.status(404).json({msg: 'Tarea no encontrada'})
+            
+        }
+        return res.json(task.rows)
+    } catch (error) {
+        return res.json({error: error.message})
+    }
 }
 
 const createTask = async (req, res) => {
