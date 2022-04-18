@@ -42,7 +42,18 @@ const updateTask = async (req, res) => {
 }
 
 const deleteTask = async (req, res) => {
-    res.send('eliminando 1 tarea')
+    const {id} = req.params
+    try {
+        const task = await pool.query(
+            'DELETE FROM task where id = $1'
+            ,[id])
+        if(task.rowCount === 0){
+            return res.status(404).json({msg: 'Tarea no encontrada'})    
+        }
+        return res.sendStatus(204)
+    } catch (error) {
+        return res.json({error: error.message})
+    }
 }
 
 
